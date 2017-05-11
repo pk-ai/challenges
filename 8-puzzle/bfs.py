@@ -11,10 +11,10 @@ class Node:
         self.parent = parent
 
 def getPathtoGoal(node, path_to_goal):
-    if node.path == None:
-        return []
+    if node.step == None:
+        return path_to_goal
     else:
-        path_to_goal.insert(0, node.path)
+        path_to_goal.insert(0, node.step)
         return getPathtoGoal(node.parent, path_to_goal)
 
 def getSteps(node_state):
