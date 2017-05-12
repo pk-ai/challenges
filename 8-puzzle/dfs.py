@@ -6,12 +6,12 @@ import sys, time
 from pktippa.util import Node, getPathtoGoal, getSteps
 
 def bfs(initial_state, given_goal_state):
-    init_state = list(map(int, initial_state.split(',')))
-    goal_state = list(map(int, given_goal_state.split(',')))
+    init_state = initial_state.split(',')
+    goal_state = given_goal_state.split(',')
     total_nodes_visited = 0
     nodes_list = []
-    states_list = []
-    visited_states = []
+    states_list = set()
+    visited_states = set()
     if len(init_state) != len(goal_state) or len(init_state) != 9 or len(goal_state) != 9:
         print("Invalid Input, please enter valid input.")
     else:
@@ -24,9 +24,12 @@ def bfs(initial_state, given_goal_state):
                 return None
             else:
                 node = nodes_list.pop(0)
-                visited_states.append(node.state)
+                visited_states.add("".join(node.state))
                 if node.state == goal_state:
                     path_to_goal = getPathtoGoal(node)
+                    print("nodes list ", len(nodes_list))
+                    print("visited_states list ", len(visited_states))
+                    print("node depth", node.depth)
                     return path_to_goal
                 else:
                     steps = getSteps(node.state)
@@ -36,13 +39,14 @@ def bfs(initial_state, given_goal_state):
                     steps.reverse()
                     for step in steps:
                         new_state = node.state[:]
-                        old, new = node.state.index(0), step[1]
+                        old, new = node.state.index("0"), step[1]
                         new_state[new], new_state[old] = new_state[old], new_state[new]
-                        if new_state not in states_list and new_state not in visited_states:
+                        new_state_str = "".join(new_state)
+                        if new_state_str not in states_list and new_state_str not in visited_states:
                             # The below step is different from the BFS approach
                             # DFS follows a stack "Last in First out", so element at the start
                             nodes_list.insert(0, Node(new_state, node.depth + 1, step[0], node))
-                            states_list.append(new_state)
+                            states_list.add("".join(new_state))
 
 if __name__ == '__main__':
     if(len(sys.argv) != 3):
@@ -50,5 +54,6 @@ if __name__ == '__main__':
     else:
         start = time.time()
         path_to_goal = bfs(sys.argv[1], sys.argv[2])
-        print(path_to_goal)
+        # Prints big list of Path, get print the path uncomment and see.
+        #print("Path to goal : ", path_to_goal)
         print("Total time took - ", time.time() - start)

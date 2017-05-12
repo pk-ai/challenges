@@ -23,10 +23,14 @@ def bfs(initial_state, given_goal_state):
             if not nodes_list:
                 return None
             else:
+                # Since BFS has to be implemented in Queue, which is First in First out
+                # So we are retrieving the first element
                 node = nodes_list.pop(0)
                 visited_states.add("".join(node.state))
                 if node.state == goal_state:
                     path_to_goal = getPathtoGoal(node)
+                    print("Remaining nodes list ", len(nodes_list))
+                    print("visited_states list ", len(visited_states))
                     return path_to_goal, len(nodes_list) + len(visited_states), node.depth
                 else:
                     steps = getSteps(node.state)
@@ -36,6 +40,7 @@ def bfs(initial_state, given_goal_state):
                         new_state[new], new_state[old] = new_state[old], new_state[new]
                         new_state_str = "".join(new_state)
                         if new_state_str not in visited_states and new_state_str not in states_list:
+                            # Appending the element at the end, so pop(0) can work as Queue
                             nodes_list.append(Node(new_state, node.depth + 1, step[0], node))
                             states_list.add(new_state_str)
 
@@ -46,6 +51,6 @@ if __name__ == '__main__':
         start = time.time()
         path_to_goal, nodes_expanded, search_depth = bfs(sys.argv[1], sys.argv[2])
         print("Path to goal: ", path_to_goal)
-        print("Nodes Expanded: ", nodes_expanded)
+        print("total Nodes Expanded: ", nodes_expanded)
         print("Search Depth: ", search_depth)
         print("Total time took - ", time.time() - start)
