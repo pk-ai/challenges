@@ -91,5 +91,5 @@ ENV/
 # Visual Studio Code
 .vscode
 
-# Temp file
-temp.py
+# Temp files
+temp*

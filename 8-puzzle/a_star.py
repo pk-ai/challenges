@@ -7,26 +7,58 @@
 import sys, time
 from heapq import heappush, heappop
 from pktippa.util import Node, getPathtoGoal, getSteps
-def getScore(initial_state, goal_state):
-    return sum([1 if initial_state[i] != "0" and initial_state[i] != goal_state[i] else 0 for i in range(0,9)])
+goal_state = []
+goal_state_matrix = []
 
+# Score considering number of displaced tiles other than 0 or empty space
+#def getScore(initial_state, goal_state):
+#    return sum([1 if initial_state[i] != "0" and initial_state[i] != goal_state[i] else 0 for i in range(0,9)])
+
+# Score considering manhattan distance.
+def getScore(initial_state):
+    sum = 0
+    nums = ["1","2","3","4","5","6","7","8"]
+    inital_state_matrix = list(getMatrix(initial_state))
+    for num in nums:
+        (i,j) = getMatrixPos(inital_state_matrix, num)
+        (k,l) = getMatrixPos(goal_state_matrix, num)
+        # Manhattan distance for grid/matrix
+        sum += abs(i-k) + abs(j-l)
+    return sum
+
+# Converting [8,6,4,2,1,3,5,7,0] to matrix [[8, 6, 4], [2, 1, 3], [5, 7, 0]]
+def getMatrix(state):
+    for i in range(0, len(state), 3):
+        yield state[i:i + 3]
+
+# Getting the (row, column) of respective element in matrix.
+def getMatrixPos(states_matrix, num):
+    for i in range(0,3):
+        for j in range(0,3):
+            if states_matrix[i][j] == num:
+                return (i,j)
+
+# Performs a star algorithm to solve 8-puzzle game.
 def a_star(initial_state, given_goal_state):
     init_state = initial_state.split(',')
+    global goal_state
     goal_state = given_goal_state.split(',')
     total_nodes_visited = 0
     nodes_list = []
     states_list = set()
     visited_states_count = 0
     max_search_depth = 0
+    global goal_state_matrix
+    goal_state_matrix = list(getMatrix(goal_state))
     if len(init_state) != len(goal_state) or len(init_state) != 9 or len(goal_state) != 9:
         print("Invalid Input, please enter valid input.")
     else:
         print("Doing A Star to solve.")
-        score = getScore(init_state, goal_state)
-        first_node = Node(init_state, 0, None, None, score)
-        heappush(nodes_list, (score, first_node))
+        first_node = Node(init_state, 0, None, None, 0)
+        heappush(nodes_list, (0, first_node))
         states_list.add("".join(init_state))
         path_to_goal = []
+
         while True:
             if not nodes_list:
                 return path_to_goal, visited_states_count, max_search_depth, 0
@@ -48,7 +80,7 @@ def a_star(initial_state, given_goal_state):
                         new_state_str = "".join(new_state)
                         if new_state_str not in states_list:
                             # Appending the element at the end, so pop(0) can work as Queue
-                            score = getScore(new_state, goal_state) + node.depth + 1
+                            score = getScore(new_state) + node.depth + 1
                             new_node = Node(new_state, node.depth + 1, step[0], node, score)
                             heappush(nodes_list, (score, new_node))
                             max_search_depth = (node.depth + 1) if (node.depth + 1) > max_search_depth else max_search_depth
