@@ -5,7 +5,7 @@
 import sys, time
 from pktippa.util import Node, getPathtoGoal, getSteps
 
-def bfs(initial_state, given_goal_state):
+def dfs(initial_state, given_goal_state):
     init_state = initial_state.split(',')
     goal_state = given_goal_state.split(',')
     total_nodes_visited = 0
@@ -55,7 +55,7 @@ if __name__ == '__main__':
         print("Please enter start state and goal state")
     else:
         start = time.time()
-        path_to_goal, nodes_expanded, max_search_depth, node_depth = bfs(sys.argv[1], sys.argv[2])
+        path_to_goal, nodes_expanded, max_search_depth, node_depth = dfs(sys.argv[1], sys.argv[2])
         # Prints big list of Path, to print the path uncomment and see.
         #print("Path to goal : ", path_to_goal)
         print("total Nodes Expanded or visited nodes: ", nodes_expanded)
