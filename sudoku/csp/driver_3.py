@@ -1,16 +1,20 @@
+# python3 driver_3.py 000000000302540000050301070000000004409006005023054790000000050700810000080060009
+# Should print the output as
+# 148697523372548961956321478567983214419276385823154796691432857735819642284765139
+import sys, copy
 import itertools
-variables = {
-    'A1':0,'A2':0,'A3':0,'A4':0,'A5':0,'A6':0,'A7':0,'A8':0,'A9':0,
-    'B1':0,'B2':0,'B3':0,'B4':0,'B5':0,'B6':0,'B7':0,'B8':0,'B9':0,
-    'C1':0,'C2':0,'C3':0,'C4':0,'C5':0,'C6':0,'C7':0,'C8':0,'C9':0,
-    'D1':0,'D2':0,'D3':0,'D4':0,'D5':0,'D6':0,'D7':0,'D8':0,'D9':0,
-    'E1':0,'E2':0,'E3':0,'E4':0,'E5':0,'E6':0,'E7':0,'E8':0,'E9':0,
-    'F1':0,'F2':0,'F3':0,'F4':0,'F5':0,'F6':0,'F7':0,'F8':0,'F9':0,
-    'G1':0,'G2':0,'G3':0,'G4':0,'G5':0,'G6':0,'G7':0,'G8':0,'G9':0,
-    'H1':0,'H2':0,'H3':0,'H4':0,'H5':0,'H6':0,'H7':0,'H8':0,'H9':0,
-    'I1':0,'I2':0,'I3':0,'I4':0,'I5':0,'I6':0,'I7':0,'I8':0,'I9':0
-}
-constraints = {
+variables = dict()
+variableConsts = [
+    'A1','A2','A3','A4','A5','A6','A7','A8','A9',
+    'B1','B2','B3','B4','B5','B6','B7','B8','B9',
+    'C1','C2','C3','C4','C5','C6','C7','C8','C9',
+    'D1','D2','D3','D4','D5','D6','D7','D8','D9',
+    'E1','E2','E3','E4','E5','E6','E7','E8','E9',
+    'F1','F2','F3','F4','F5','F6','F7','F8','F9',
+    'G1','G2','G3','G4','G5','G6','G7','G8','G9',
+    'H1','H2','H3','H4','H5','H6','H7','H8','H9',
+    'I1','I2','I3','I4','I5','I6','I7','I8','I9']
+constraints = [
     ['A1', 'A2', 'A3', 'A4', 'A5', 'A6', 'A7', 'A8', 'A9'],
     ['B1', 'B2', 'B3', 'B4', 'B5', 'B6', 'B7', 'B8', 'B9'],
     ['C1', 'C2', 'C3', 'C4', 'C5', 'C6', 'C7', 'C8', 'C9'],
@@ -38,6 +42,45 @@ constraints = {
     ['A7', 'A8', 'A9', 'B7', 'B8', 'B9', 'C7', 'C8', 'C9'],
     ['D7', 'D8', 'D9', 'E7', 'E8', 'E9', 'F7', 'F8', 'F9'],
     ['G7', 'G8', 'G9', 'H7', 'H8', 'H9', 'I7', 'I8', 'I9']
-}
-domians = {1,2,3,4,5,6,7,8,9}
+]
+domains = ['1','2','3','4','5','6','7','8','9']
+
+def backtrack(var_with_vals):
+    if assignmentComplete(var_with_vals): return var_with_vals
+    var_copy_with_vals = copy.deepcopy(var_with_vals)
+    unassigned_var = getUnAssignedValue(var_copy_with_vals)
+    for el in domains:
+        var_copy_with_vals[unassigned_var] = el
+        if alldiff(var_copy_with_vals):
+            result = backtrack(var_copy_with_vals)
+            if result != 1: return result
+        var_copy_with_vals[unassigned_var] = '0'
+    return 1
+
 def alldiff(varVals):
+    for list1 in constraints:
+        for a, b in itertools.combinations(list1, 2):
+            if varVals.get(a, 'x') == varVals.get(b, 'y'):
+                return False
+    return True
+
+def assignmentComplete(varDict):
+    for el in variableConsts:
+        if varDict.get(el, '0') == '0':
+            return False
+    return True
+
+def getUnAssignedValue(var_dict):
+    for el in variableConsts:
+        if var_dict.get(el, '0') == '0':
+            return el
+
+inputSudoku = list(sys.argv[1])
+for key, el in zip(variableConsts, inputSudoku):
+    if el != '0':
+        variables[key] = el
+result = backtrack(variables)
+final_res = ''
+for el in variableConsts:
+    final_res += result[el]
+print(final_res)
