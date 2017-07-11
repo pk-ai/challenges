@@ -50,6 +50,11 @@ def backtrack(var_with_vals):
     var_copy_with_vals = copy.deepcopy(var_with_vals)
     unassigned_var = getUnAssignedValue(var_copy_with_vals)
     reduced_domains = getReducedDomains(var_copy_with_vals, domains[:], unassigned_var)
+    # As per definition of Forward Checking(FC)
+    # Def: Keep track of remaining legal values for the unassigned variables. Terminate when any variable has no legal values.
+    # Here the Forward checking Heuristic also integrated
+    # Since the reduced_domains may return an empty list []
+    # for which we are not proceeding further
     for el in reduced_domains:
         var_copy_with_vals[unassigned_var] = el
         if alldiff(var_copy_with_vals):
@@ -59,6 +64,7 @@ def backtrack(var_with_vals):
     return 1
 
 # Minimum Remaining Value(MRV) Heuristic
+# Def: Choose the variable with the fewest legal values in its domain. Pick the hardest.!
 def getReducedDomains(varVals, orgDomains, unassigned_var):
     # Reducing the domain by checking the applicable constraints
     # Get the applicable constraints which have the unassigned_var. i.e. 
