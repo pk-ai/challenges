@@ -1,9 +1,12 @@
 # python3 driver_3.py 000000000302540000050301070000000004409006005023054790000000050700810000080060009
 # Should print the output as
-# 148697523372548961956321478567983214419276385823154796691432857735819642284765139
+# 148697523372548961956321478567983214419276385823154796691432857735819642284765139 BTS
+# python3 driver_3.py 000260701680070090190004500820100040004602900050003028009300074040050036703018000
+# 435269781682571493197834562826195347374682915951743628519326874248957136763418259 AC3
 import sys, copy
 import itertools
 variables = dict()
+variables_ac3 = dict()
 variableConsts = [
     'A1','A2','A3','A4','A5','A6','A7','A8','A9',
     'B1','B2','B3','B4','B5','B6','B7','B8','B9',
@@ -102,13 +105,60 @@ def getUnAssignedValue(var_dict):
         if var_dict.get(el, '0') == '0':
             return el
 
+# Solving the CSP using Arc consistency AC3 algorithm
+def arc_consistency_ac3():
+    org_ac3_constraints = []
+    # Constructing binary arc constraints from n-ary (all diff) constraint
+    for const in constraints:
+        # Generating new binary constraints
+        new_bin_consts = [a+'->'+b for a, b in itertools.permutations(const, 2)]
+        # Adding the binary constraints which are there in new but not in org
+        org_ac3_constraints += list(set(new_bin_consts) - set(org_ac3_constraints))
+    ac3_constraints = org_ac3_constraints[:]
+    # While the Queue is empty
+    while len(ac3_constraints) > 0:
+        gt_constraint = ac3_constraints.pop(0)
+        xi, xj = gt_constraint.split('->')
+        vals_xj = variables_ac3[xj]
+        # Xj value length 1 means, its the original value given
+        if len(vals_xj) == 1:
+            vals_xi = variables_ac3[xi]
+            # Checking the inconsistency and revising the domain
+            if vals_xj[0] in vals_xi:
+                variables_ac3[xi].remove(vals_xj[0])
+                for cnst in org_ac3_constraints:
+                    # Adding the neighbours to the Queue
+                    if  xi == cnst.split('->')[1] and cnst not in ac3_constraints:
+                        ac3_constraints.append(cnst)
+    solved = True
+    # If all the domains of variables_ac3 key values are having a single value
+    # that means we have solved the problem
+    for el in variableConsts:
+        if len(variables_ac3[el]) > 1:
+            solved = False
+            break
+    return solved
+
 if __name__ == '__main__':
     inputSudoku = list(sys.argv[1])
     for key, el in zip(variableConsts, inputSudoku):
         if el != '0':
             variables[key] = el
-    result = backtrack(variables)
+            variables_ac3[key] = [el]
+        else:
+            # Assigning all values to the domain
+            variables_ac3[key] = ['1','2','3','4','5','6','7','8','9']
     final_res = ''
-    for el in variableConsts:
-        final_res += result[el]
-    print(final_res)
+    if arc_consistency_ac3():
+        for el in variableConsts:
+            # Constructing final solved Sudoku
+            final_res += variables_ac3[el][0]
+        print(final_res, 'AC3')
+    else:
+        result = backtrack(variables)
+        if result != 1:
+            for el in variableConsts:
+                final_res += result[el]
+            print(final_res, 'BTS')
+        else:
+            print('Failed')

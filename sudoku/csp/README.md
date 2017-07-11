@@ -19,3 +19,26 @@ function backtrack(assignment, csp) returns a solution or failure
         remove { var = value } from assignment
     return failure
 ```
+
+# Arc Consistency AC3
+
+```
+function ac3(csp) returns False if an inconsistency is found, True otherwise
+inputs: csp, a binary CSP with components (X, D, C)
+local variables: queue, a queue of arcs, initially all arcs in csp
+while queue is not empty do
+    (Xi, Xj) = REMOVE-FIRST(queue)
+    if REVISE(csp, Xi, Xj) then
+        if size of Di = 0 then return False
+        for each Xk in Xi.Neighbors - {Xj} do
+            add (Xk, Xi) to queue
+return true
+
+function REVISE(csp, Xi, Xj) returns True iff we revise the domain of Xi
+revised = False
+for each x in Di, do
+    if no value y in Dj allows (x,y) to satisfy the constraint between Xi and Xj then
+        delete x from Di
+        revised = True
+return revised
+```
