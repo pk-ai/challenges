@@ -49,13 +49,34 @@ def backtrack(var_with_vals):
     if assignmentComplete(var_with_vals): return var_with_vals
     var_copy_with_vals = copy.deepcopy(var_with_vals)
     unassigned_var = getUnAssignedValue(var_copy_with_vals)
-    for el in domains:
+    reduced_domains = getReducedDomains(var_copy_with_vals, domains[:], unassigned_var)
+    for el in reduced_domains:
         var_copy_with_vals[unassigned_var] = el
         if alldiff(var_copy_with_vals):
             result = backtrack(var_copy_with_vals)
             if result != 1: return result
         var_copy_with_vals[unassigned_var] = '0'
     return 1
+
+# Minimum Remaining Value(MRV) Heuristic
+def getReducedDomains(varVals, orgDomains, unassigned_var):
+    # Reducing the domain by checking the applicable constraints
+    # Get the applicable constraints which have the unassigned_var. i.e. 
+    # Application row wise, column wise and 3x3 box wise
+    # From the applicable constraints, get only assigned vars and not the
+    # unassigned_var to build assigned_vars
+    assigned_vars = []
+    for constraint in constraints:
+        if unassigned_var in constraint:
+            for el in constraint:
+                if el != unassigned_var and el not in assigned_vars and varVals.get(el, '0') != '0':
+                    assigned_vars.append(el)
+    # From the built assigned vars, get the values and remove them from the domains
+    for el in assigned_vars:
+        if varVals[el] in orgDomains:
+            orgDomains.remove(varVals[el])
+    # Returning reduced domain
+    return orgDomains
 
 def alldiff(varVals):
     for list1 in constraints:
@@ -75,12 +96,13 @@ def getUnAssignedValue(var_dict):
         if var_dict.get(el, '0') == '0':
             return el
 
-inputSudoku = list(sys.argv[1])
-for key, el in zip(variableConsts, inputSudoku):
-    if el != '0':
-        variables[key] = el
-result = backtrack(variables)
-final_res = ''
-for el in variableConsts:
-    final_res += result[el]
-print(final_res)
+if __name__ == '__main__':
+    inputSudoku = list(sys.argv[1])
+    for key, el in zip(variableConsts, inputSudoku):
+        if el != '0':
+            variables[key] = el
+    result = backtrack(variables)
+    final_res = ''
+    for el in variableConsts:
+        final_res += result[el]
+    print(final_res)
