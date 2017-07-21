@@ -1,4 +1,3 @@
-
 from random import randint
 from BaseAI import BaseAI
 from Node import Node
@@ -7,7 +6,7 @@ from heapq import heappush, heappop
 timeTimlimit  = 0.2
 prevTime =  0
 currentTime = 0
-node_depth = 6
+node_depth = 4
 possibleNewTiles = [2, 4]
 defaultProbability = 0.9
 class PlayerAI(BaseAI):
@@ -22,8 +21,10 @@ class PlayerAI(BaseAI):
             if len(moves) > 1:
                 first_node = Node(grid,0,-1,None,0)
                 (node, score) = maximize(first_node, -math.inf, math.inf)
-                print(node.grid)
-                return node.move
+                if node:
+                    return node.move
+                else:
+                    return moves[randint(0, len(moves) - 1)]
             else:
                 return moves[0]
         else:
@@ -37,12 +38,12 @@ def maximize(given_node, alpha, beta):
     while max_child_nodes:
         child = heappop(max_child_nodes)[1]
         (_, utility) = minimize(child, alpha, beta)
-        if utility < maxUtility:
+        if utility > maxUtility:
             (maxChild, maxUtility) = (child, utility)
         if maxUtility >= beta:
             break;
         if maxUtility > alpha:
-            beta = maxUtility
+            alpha = maxUtility
     return (maxChild, maxUtility)
 
 def minimize(given_node, alpha, beta):
@@ -81,7 +82,8 @@ def get_min_child_nodes(given_node):
             cloned_grid.setCellValue(ac, getNewTileValue())
             score = heuristic_eval_board(cloned_grid)
             child_node = Node(cloned_grid,given_node.depth+1,-1,given_node,score)
-            heappush(min_child_nodes, (score, child_node))
+            # Do we have to push with -score or score - Which one can lead to max pruning ?
+            heappush(min_child_nodes, (-score, child_node))
     return min_child_nodes
 
 def getNewTileValue():
@@ -105,9 +107,12 @@ def heuristic_eval_board(grid):
     for el in board_edges:
         if grid.map[el[0]][el[1]] in max_tiles:
             # Shall we add max_tile score value or just add 1 as bonus
-            max_tiles_socre += 1
+            max_tiles_socre += grid.map[el[0]][el[1]]
     # What is the weight for large values on edge
     total_score += max_tiles_socre
+    # More heuristics to add as follows
+    # a.) Number of potential merges
+    # b.) Keep the big tiles on edges and keep the next big tiles like a snake
     return total_score
 
 # Return the Tiles with Maximum Value (at max of 4, since any square grid contains only 4 edges)

@@ -24,7 +24,7 @@ function MAXIMIZE(state, alpha, beta) returns Tuple of (state, utility):
     (maxChild, maxUtility) = (null, -Infinity)
     for child in state.children():
         (_, utility) = MINIMIZE(child, alpha, beta)
-        if utility < maxUtility:
+        if utility > maxUtility:
             (maxChild, maxUtility) = (child, utility)
         if maxUtility >= beta:
             break;

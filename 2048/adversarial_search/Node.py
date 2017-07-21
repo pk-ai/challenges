@@ -1,8 +1,8 @@
 class Node:
-    def __init__(self, grid, depth, step, parent, score=0):
+    def __init__(self, grid, depth, move, parent, score=0):
         self.grid = grid
         self.depth = depth
-        self.step = step
+        self.move = move
         self.parent = parent
         self.score = score
 
